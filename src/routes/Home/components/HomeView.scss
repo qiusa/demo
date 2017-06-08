@@ -1,0 +1,601 @@
+@function pxTorem($px) {
+    //$px为需要转换的字号
+    @return $px / 37.5 * 1rem;
+}
+.m-room {
+    padding: pxTorem(25) pxTorem(10) 0;
+    .avatar {
+        float: left;
+        overflow: hidden;
+
+        width: pxTorem(34);
+        height: pxTorem(34);
+        img {
+            width: 100%;
+            height: 100%;
+
+            vertical-align: top;
+
+            border-radius: 50%;
+            background-color: #fff;
+        }
+    }
+    .detail {
+        font-size: 14px;
+        line-height: 14px;
+
+        float: left;
+
+        margin-left: pxTorem(5);
+
+        letter-spacing: 0;
+
+        color: #fff;
+        color: #fff;
+        text-shadow: 0 1px 1px rgba(0,0,0,.40);
+        .title {
+            padding: 6px 0 4px;
+        }
+        .desc {
+            font-size: 12px;
+            line-height: 12px;
+        }
+    }
+    .person-num {
+        font-size: 14px;
+        line-height: pxTorem(24);
+
+        width: pxTorem(80);
+        height: pxTorem(24);
+        margin-top: pxTorem(15);
+        padding-left: pxTorem(10);
+
+        letter-spacing: 0;
+
+        color: #fff;
+        border-radius: 51px;
+        background: rgba(0,0,0,.20);
+        text-shadow: 0 1px 1px rgba(0,0,0,.40);
+    }
+    //关闭按钮
+    b {
+        font-size: 0;
+        line-height: 0;
+
+        position: absolute;
+        top: 10px;
+        right: 10px;
+
+        display: inline-block;
+
+        width: 20px;
+        height: 2px;
+
+        -webkit-transform: rotate(45deg);
+        vertical-align: middle;
+
+        background: #fff;
+    }
+    b:after {
+        display: block;
+
+        width: 20px;
+        height: 2px;
+
+        content: '.';
+        -webkit-transform: rotate(-90deg);
+
+        background: #fff;
+    }
+    .chat-loading {
+        z-index: 10;
+
+        text-align: center;
+    }
+    .chat {
+        position: absolute;
+        bottom: pxTorem(70);
+        left: pxTorem(10);
+
+        overflow-y: auto;
+
+        width: pxTorem(300);
+        height: pxTorem(100);
+        .nick {
+            font-size: 14px;
+            line-height: 23px;
+
+            position: relative;
+
+            display: inline-block;
+
+            color: #238efa;
+        }
+        .text {
+            font-size: 14px;
+            line-height: 23px;
+
+            display: inline-block;
+
+            word-wrap: break-word;
+            word-break: break-all;
+
+            color: #fff;
+        }
+        .sys {
+            color: red;
+        }
+    }
+    .edit {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+
+        box-sizing: border-box;
+        height: pxTorem(60);
+        padding: 0 pxTorem(10);
+        .edit-info {
+            float: left;
+
+            width: 80px;
+            height: 80px;
+            margin: -10px 0 0 -20px;
+
+            -webkit-transform: scale(.5);
+                -ms-transform: scale(.5);
+                 -o-transform: scale(.5);
+                    transform: scale(.5);
+
+            background-image: url(../assets/sprite.png);
+            background-position: 0 -644px;
+        }
+        .edit-info:active {
+            background-image: url(../assets/sprite.png);
+            background-position: 0 -324px;
+        }
+        .edit-gift {
+            float: right;
+
+            width: 80px;
+            height: 80px;
+            margin: -10px -20px 0 0;
+
+            -webkit-transform: scale(.5);
+                -ms-transform: scale(.5);
+                 -o-transform: scale(.5);
+                    transform: scale(.5);
+
+            background-image: url(../assets/sprite.png);
+            background-position: 0 -244px;
+        }
+        .edit-gift:active {
+            -webkit-transform: scale(.5);
+                -ms-transform: scale(.5);
+                 -o-transform: scale(.5);
+                    transform: scale(.5);
+
+            background-image: url(../assets/sprite.png);
+            background-position: 0 -484px;
+        }
+        .enter-textarea {
+            position: absolute;
+            bottom: 0;
+            left: pxTorem(10);
+            .edit-text {
+                font-size: 17px;
+
+                overflow: auto;
+
+                box-sizing: border-box;
+                width: pxTorem(355);
+                height: pxTorem(34);
+                padding: pxTorem(5) pxTorem(60) 0 pxTorem(12);
+
+                resize: none;
+
+                color: #333;
+                border: 1px solid #c8c9cd;
+                border-radius: 48px;
+                background: #fafafa;
+            }
+            //输入框
+            .chat-btn {
+                font-size: 14px;
+                line-height: pxTorem(28);
+
+                position: absolute;
+                top: pxTorem(3);
+                right: pxTorem(3);
+
+                display: inline-block;
+
+                width: pxTorem(54);
+                height: pxTorem(28);
+
+                text-align: center;
+
+                color: #fff;
+                border-radius: 35px;
+                background: #238efa;
+            }
+            .chat-disabled-btn {
+                background: #868e99;
+            }
+        }
+    }
+    .like-icon {
+        position: fixed;
+        right: pxTorem(10);
+        bottom: pxTorem(70);
+
+        display: block;
+
+        width: 80px;
+        height: 80px;
+        margin: 20px -20px 0 0;
+
+        -webkit-transform: scale(.5);
+            -ms-transform: scale(.5);
+             -o-transform: scale(.5);
+                transform: scale(.5);
+
+        background-image: url(../assets/sprite.png);
+        background-position: 0 -724px;
+    }
+    .gift-box {
+        position: absolute;
+        z-index: 99;
+        bottom: 0;
+        left: 0;
+
+        width: 100%;
+        height: pxTorem(150);
+
+        background: url(../assets/bottm@2x.png) center bottom no-repeat;
+        .list {
+            position: relative;
+            z-index: 98;
+
+            height: 100%;
+            li {
+                float: left;
+
+                width: pxTorem(92);
+                height: pxTorem(95);
+
+                text-align: center;
+                .flower-icon {
+                    display: inline-block;
+
+                    width: 55px;
+                    height: 55px;
+
+                    background: url(../assets/flower@2x.png) no-repeat;
+                    background-size: contain;
+                }
+                .text {
+                    font-size: 12px;
+                    line-height: 12px;
+
+                    padding-top: 8px;
+
+                    color: #3f3f3f;
+                }
+            }
+            .cur {
+                background: #fff;
+            }
+        }
+        .gift-send {
+            font-size: 14px;
+            line-height: 30px;
+
+            display: inline-block;
+            float: right;
+
+            width: 54px;
+            height: 30px;
+            margin-top: 6px;
+
+            text-align: center;
+
+            color: #fff;
+            border-radius: 4px;
+            background: #238efa;
+        }
+    }
+    .over-load {
+        position: fixed;
+        z-index: 88;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+    }
+}
+.u-login {
+    position: absolute;
+    z-index: 80;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    background-color: rgba(0,0,0,0);
+    .over-load {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+    }
+    .blur-bg {
+        position: absolute;
+        z-index: -1;
+        bottom: 0;
+        left: 0;
+
+        width: 100%;
+        height: pxTorem(250);
+
+        background: url(../assets/bottm@2x.png) bottom center no-repeat #000;
+
+        -webkit-filter: blur(10px); /* Chrome, Opera */
+           -moz-filter: blur(10px);
+            -ms-filter: blur(10px);
+                filter: blur(10px);
+    }
+    .wrap {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+
+        width: 100%;
+        padding: pxTorem(20) pxTorem(14) pxTorem(56);
+
+        text-align: center;
+        .icon {
+            display: inline-block;
+
+            width: 18px;
+            height: 18px;
+
+            vertical-align: middle;
+
+            background-image: url(../assets/icons.png);
+            background-repeat: no-repeat;
+        }
+        .icon-account {
+            position: absolute;
+            top: pxTorem(11);
+            left: pxTorem(6);
+
+            background-position: 0 -112px;
+        }
+        .icon-pwd {
+            position: absolute;
+            top: pxTorem(11);
+            left: pxTorem(6);
+
+            background-position: 0 -133px;
+        }
+        .tt {
+            font-size: 16px;
+
+            margin: 20px;
+
+            text-align: left;
+        }
+        .close {
+            font-size: 16px;
+            line-height: 30px;
+
+            position: absolute;
+            top: 14px;
+            right: 15px;
+
+            width: 30px;
+            height: 30px;
+
+            cursor: pointer;
+        }
+    }
+    .row {
+        position: relative;
+
+        margin-bottom: pxTorem(10);
+        .type {
+            position: absolute;
+            top: 10px;
+            left: 25px;
+        }
+    }
+    .ipt {
+        line-height: pxTorem(40);
+
+        box-sizing: border-box;
+        width: pxTorem(348);
+        height: pxTorem(40);
+        padding-left: pxTorem(29);
+
+        border: 1px solid #979797;
+        border-radius: 4px;
+        background: #d8d8d8;
+    }
+    .btn {
+        font-size: 14px;
+        line-height: pxTorem(40);
+
+        display: block;
+
+        width: pxTorem(348);
+        height: pxTorem(40);
+
+        color: #fff;
+        border-radius: 4px;
+        background: #238efa;
+    }
+    .disabled-btn {
+        background: #868e99;
+        span {
+            opacity: .3;
+        }
+    }
+    .errorMsg {
+        font-size: 14px;
+
+        padding-left: 18px;
+
+        text-align: left;
+
+        color: #e60012;
+        &.hide {
+            display: none;
+        }
+    }
+    .action {
+        font-size: 12px;
+
+        display: inline-block;
+
+        margin-top: pxTorem(5);
+
+        color: #238efa;
+    }
+}
+//toast提示框
+.m-toast {
+    position: fixed;
+    z-index: 10001;
+    top: 50%;
+    right: 0;
+    left: 0;
+
+    display: none;
+
+    margin-top: -24px;
+
+    text-align: center;
+    p {
+        font-size: 12px;
+        line-height: 48px;
+
+        display: inline-block;
+
+        height: 48px;
+        padding: 0 20px;
+
+        color: #fff;
+        border-radius: 3px;
+    }
+}
+.m-toast.error-tip p {
+    background: #333;
+}
+.m-toast.success-tip p {
+    background: #333;
+}
+//video
+.m-play {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    .play-btn {
+        position: absolute;
+        z-index: 9999;
+        top: 50px;
+        left: 40px;
+
+        width: 60px;
+        height: 60px;
+
+        background: #ccc;
+    }
+    .play-main {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        .video {
+            width: 100%;
+            height: 100%;
+        }
+    }
+    .video-tip {
+        position: absolute;
+        z-index: 1;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+
+        background: rgba(0, 0, 0, .7);
+        //直播结束
+        .end {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            .end-avatar {
+                width: pxTorem(120);
+                height: pxTorem(120);
+                margin: pxTorem(78) auto 0;
+                display: block;
+                img {
+                    width: 100%;
+                }
+            }
+            .end-nick {
+                font-size: 15px;
+                line-height: 15px;
+
+                padding-top: pxTorem(7);
+
+                text-align: center;
+
+                color: #fff;
+            }
+            .end-text {
+                font-size: 20px;
+                line-height: 20px;
+
+                padding-top: pxTorem(40);
+
+                text-align: center;
+
+                color: #fff;
+            }
+            .end-btn {
+                font-size: 14px;
+                display: block;
+                width: pxTorem(60);
+                height: pxTorem(30);
+                margin: pxTorem(40) auto 0;
+                line-height: pxTorem(30);
+                text-align: center;
+
+                color: #fff;
+                border-radius: 4px;
+                background: #238efa;
+            }
+        }
+        .p-text {
+            font-size: 18px;
+
+            position: absolute;
+            top: 46%;
+            right: 0;
+            left: 0;
+
+            text-align: center;
+
+            color: #fff;
+        }
+    }
+}
