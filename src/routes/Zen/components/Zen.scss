@@ -1,50 +1,115 @@
-@function pxTorem($px){//$px为需要转换的字号
-  @return $px / 37.5 * 1rem;
+@function pxTorem($px) {
+    //$px为需要转换的字号
+    @return $px / 37.5 * 1rem;
 }
-.loading{
-  height: 40px;
-  text-align: center;
-  div {
-    display: inline-block;
-  }
+body{background: #EEEEEE;}
+.loading {
+    height: 40px;
+
+    text-align: center;
+    div {
+        display: inline-block;
+    }
 }
-.mt10{
+.mt10 {
     margin-top: 10px;
 }
-.m-nav{
-    .nav-list{
-        li{
-            line-height: 40px;
-            text-align: center;
+.m-nav {
+    .title {
+        width: 100%;
+        height: pxTorem(47);
+
+        background: #238efa;
+    }
+    .logo {
+        display: inline-block;
+
+        width: pxTorem(28);
+        height: pxTorem(20);
+        margin: pxTorem(14) pxTorem(8) 0 pxTorem(12);
+
+        vertical-align: top;
+
+        background: url(../assets/logo.png) no-repeat;
+        background-size: contain;
+    }
+    .text {
+        font-size: 17px;
+        line-height: pxTorem(47);
+
+        display: inline-block;
+
+        height: pxTorem(47);
+
+        vertical-align: top;
+
+        color: #fff;
+    }
+    .nav-list {
+        font-size: 17px;
+
+        color: #333;
+        background: rgba(247,247,248,.95);
+        li {
+            line-height: 44px;
+
+            position: relative;
+
             display: inline-block;
+
             width: pxTorem(187.5);
-        }
-        .cur{
-            border-bottom: 2px solid #999;
-        }
-    }
-    .box{
-        padding: 0 pxTorem(15);
-        .text-input{
-            width: 100%;
-            height: pxTorem(40);
-            line-height: pxTorem(40);
-            border-radius: 4px;
-            background: #D8D8D8;
-            border: 1px solid #979797;
-            padding-left: 6px;
-        }
-        .btn{
-            width: 100%;
-            height: pxTorem(40);
-            line-height: pxTorem(40);
-            border-radius: 4px;
-            font-size: 15px;
+
             text-align: center;
-            color: #fff;
-            background: #238EFA;
-            display: inline-block;
+        }
+        .cur {
+            .line {
+                position: absolute;
+                bottom: 0;
+                left: pxTorem(34);
+
+                width: pxTorem(120);
+
+                border-bottom: 2px solid #238efa;
+            }
         }
     }
-        
+    .box {
+        margin-top: pxTorem(21);
+        .text-input {
+            line-height: pxTorem(40);
+
+            width: 100%;
+            height: pxTorem(40);
+            padding: pxTorem(10);
+
+            border-top: pxTorem(1) solid rgba(0,0,0,0.20);
+            border-bottom: pxTorem(1) solid rgba(0,0,0,0.20);
+            background: #fff;
+        }
+        .btn {
+            font-size: 14px;
+            margin: pxTorem(21) auto 0;
+            line-height: pxTorem(40);
+
+            display: block;
+
+            
+            width: pxTorem(348);
+            height: pxTorem(40);
+            height: pxTorem(40);
+
+            text-align: center;
+
+            color: #fff;
+            border-radius: 4px;
+            background: rgb(35,142,250);
+        }
+        .disabled-btn {
+            background: rgba(35,142,250,0.30);
+            border-radius: 4px;
+            span {
+                opacity: .3;
+            }
+        }
+    }
 }

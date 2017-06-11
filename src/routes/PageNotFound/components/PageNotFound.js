@@ -12,7 +12,6 @@ class PageNotFound extends Component {
         <h3>
           <a className={classes.link} onClick={props.router.goBack}>Back</a>
         </h3>
-        <img src={NotFoundImage} />
       </div>
     )
   }

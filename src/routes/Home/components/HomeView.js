@@ -6,7 +6,9 @@ import ReactDOM, {
 } from 'react-dom';
 import page from './room.js'
 import util from '../../../components/util.js'
+import config from '../../../components/config.js'
 import Notifications, {notify1} from 'react-notify-toast';
+import anime from './anime.js'
 import Toast from './toast.js';
 import VideoPlayer from './videoPlay.js';
 import defaultImage from '../assets/default-icon.png'
@@ -18,16 +20,22 @@ import './HomeView.scss'
     <img className='duck' src={DuckImage} />
   </div>
 )*/
+//const ROOT = 'http://10.240.76.73:8088'
+//const ROOT = 'http://139.196.73.243' //外网环境
+
 let dataWin = {
-    account: 'qiusa',
-    password: '123456a',
+    account: '',
+    password: '',
     roomid: util.getIdTag('roomid'),
+    isTourist: true, //是否是游客模式
     pullUrl: '',
     person: {},
     appkey: '45c6af3c98409b18a84451215d0bdd6e',
     token: '',
     roomid2: '9213830',
     appkey2: '71c281ff6ab950e47a2f6f60d4378d9f',
+    isWeixin: util.isWeixin(),
+    isIos: util.isIos()
 };
 class HomeView extends Component {
     /*static defaultProps = {
@@ -43,7 +51,8 @@ class HomeView extends Component {
         giftNum: 1, //礼物数量
         show: {
             loadingStatus: '', //登录聊天室状态
-            giftStatus: false //礼物状态
+            giftStatus: false, //礼物状态
+            giveHeart: false //点赞状态
         },
         sendStatus: {
             login: false, //登录状态
@@ -71,6 +80,9 @@ class HomeView extends Component {
     }
     //componentDidMount() 在组件 mounting 完成后调用
     componentDidMount() {
+        if (dataWin.isWeixin) {
+            return
+        }
         /**
          * 离开页面触发
          */
@@ -78,52 +90,51 @@ class HomeView extends Component {
             this.props.route, 
             this.routerWillLeave.bind(this)
         )
-        this.initEvent()
-        //游客模式登录 todo
-        let params = {
-            roomid: dataWin.roomid,
-            uid: dataWin.account
+        let reg=/^[0-9]*$/;
+        if (!reg.test(dataWin.roomid) || !dataWin.roomid) {
+            alert('房间号不存在')
+            this.closePage()
+            return
         }
-        //登录
-        this.doLogin(dataWin.account, dataWin.password);
-        this.refs.video.onEnded()
-        //this.refs.video.playUrl('http://gifshow-static.download.ks-cdn.com/video/home-1.mp4')
-        /*$.ajax({
-            url: 'https://app.netease.im/api/chatroom/requestAddress',
-            contentType: "application/json",
-            type: 'POST',
-            headers: {
-                appkey: dataWin.appkey
-            },
-            data: JSON.stringify(params)
-        }).done(function(data) {
-            console.info('dtata', data, this)
-            if (data.res === 200) {
-                this.setState({
-                    show: {
-                        loadingStatus: '连接中。。。'
-                    }
-                })
-                this.doLink(data.msg.addr);
+        let isRember = util.getIdTag('back') && (new Date().getTime() - util.getIdTag('back')) < 10000
+        console.info(isRember,util.readCookie('addr'),util.readCookie('hlsPullUrl'))
+        if (isRember && util.readCookie('sid') && util.readCookie('addr')) {
+            //从首页跳转进入都为游客模式
+            dataWin.isTourist = true
+            if (util.readCookie('status') === 1) {
+                this.refs.video.playUrl(util.readCookie('hlsPullUrl')) //开始播放
+            } else if (util.readCookie('status') === 0 && !util.readCookie('valid')) {
+                this.refs.video.onEnded()
             } else {
-                if (data.res === 414) {
-                    alert("账号不存在");
-                } else {
-                    alert(data.errmsg);
-                }
+                this.refs.video.showError('主播正在赶来的路上')
             }
-        }.bind(this)).fail(function(data) {
-            console.info('error', this);
-            this.setState({
-                roomCreator: '异常',
-                num: 0
-            });
-        }.bind(this));*/
+            //连接聊天室
+            if (util.readCookie('addr')) {
+                dataWin.account = util.readCookie('vAccount')
+                dataWin.token = util.readCookie('vToken')
+                this.doLink(JSON.parse(util.readCookie('addr')))
+            }
+        } else {
+            if (util.readCookie("isTourist") === 'false' && util.readCookie('sid')) {
+                dataWin.isTourist = false
+                dataWin.account = util.readCookie('vAccount')
+                dataWin.sid = util.readCookie('sid')
+                dataWin.token = util.readCookie('vToken')
+                this.getRoomEnter(dataWin.sid,)
+            } else {
+                this.doLogin()
+            }
+        }
+        
     }
 
     //连接聊天室link
     doLink(address) {
-        console.info(11,dataWin.appkey2, dataWin.account2,MD5(dataWin.token),dataWin.roomid2)
+        console.info(11,dataWin.appkey2, dataWin.account,dataWin.token,dataWin.roomid,address)
+        //进入聊天室前 先退出 保证只有一个帐号在线
+        if (this.room) {
+            this.room.disconnect()
+        }
         this.room = SDK.Chatroom.getInstance({
             appKey: dataWin.appkey2, //测试
             account: dataWin.account,
@@ -136,10 +147,6 @@ class HomeView extends Component {
                         loadingStatus: ''
                     }
                 })
-                //登陆cookie记录
-                util.setCookie("vAccount", dataWin.account);
-                util.setCookie("vToken", dataWin.token);
-                util.setCookie("sid", dataWin.sid);
                 dataWin.roomInfo = msg.chatroom;
                 dataWin.person[dataWin.account] = msg.member;
                 this.getHistoryMsgs(this.cbGetHistoryMsgs);
@@ -148,7 +155,15 @@ class HomeView extends Component {
                 //page.hideLoginView();
             }.bind(this),
             onmsgs: function(msgs) {
-                page.buildChat(msgs, 'msgs');
+                let content = false
+                if (msgs && msgs[0].content) {
+                    content = JSON.parse(msgs[0].content);
+                }
+                if (content && content.type === 2) {
+                    this.giveHeart();
+                    return;
+                }
+                page.buildChat(msgs, 'msgs', this);
             }.bind(this),
             onerror: function(error, obj) {
                 console.log('发生错误', error, obj);
@@ -219,7 +234,7 @@ class HomeView extends Component {
      */
     isLogin(type) {
         //判断是否是游客登录状态
-        if (dataWin.account !== 'qiusa1') {
+        if (dataWin.isTourist) {
             this.setState({
                 login: {
                     loginDialog: true
@@ -231,24 +246,44 @@ class HomeView extends Component {
                     loginStatus: true
                 });
                 setTimeout(function() {
-                    this.refs.textInput.focus();
+                    this.refs.textInput.focus()
                     /*document.body.scrollTop = 9999;
                     document.documentElement.scrollTop = 9999;*/
                 }.bind(this), 200)
                 this.interval = setInterval(function() {
-                    document.body.scrollTop = document.body.scrollHeight
-                }, 100)
+                    if (!this.state.loginStatus) {
+                        clearInterval(this.interval)
+                    } else {
+                        document.body.scrollTop = document.body.scrollHeight
+                    }
+                }.bind(this), 100)
             } else if (type === 2) {//发送礼物
                 this.setState({
                     show: {
                         giftStatus: true
                     }
                 })
+            } else if (type === 3) {//点赞
+                this.giveHeart()
             }
             
         }
     }
 
+    focusInput() {
+        this.interval2 = setInterval(function() {
+            console.info(99)
+            if (this.state.login.loginDialog || this.state.login.registDialog) {
+                document.body.scrollTop = document.body.scrollHeight
+            } else {
+                clearInterval(this.interval2)
+            }
+        }.bind(this), 100)
+    }
+
+    blurInput() {
+        clearInterval(this.interval2)
+    }
     /**
      * 发送文本
      * @param  {String}   text     内容
@@ -512,22 +547,32 @@ class HomeView extends Component {
                     login: true
                 }
             })
-            this.doLogin(this.state.login.username, this.state.login.password)
+            this.doLogin(this.state.login.username, this.state.login.password, true)
         }
     }
 
     /**
      * 登录
-     * @param  {String} username 帐号
-     * @param  {String} password 密码
+     * @param  {String} username  帐号
+     * @param  {String} password  密码
+     * @param  {Boolen} isSelf    是否帐号登录
      */
-    doLogin(username, password) {
-        let param = {
-            username: username,
-            password: password
+    doLogin(username, password, isSelf) {
+        let param = {}
+        console.info('acc',util.readCookie('vAccount'),dataWin.isTourist)
+        if (!dataWin.isTourist || isSelf) { //判断是否是游客模式
+            dataWin.isTourist = false
+            param = {
+                username: username,
+                password: password
+            }
+        } else if (util.readCookie('sid')){
+            param.sid = util.readCookie('sid')
         }
+        let url = dataWin.isTourist ? config.tourist : config.login
+        console.info('param',param)
         $.ajax({
-            url: "http://10.240.76.73:8088/user/login",
+            url: url,
             contentType: "application/x-www-form-urlencoded",
             type: 'POST',
             data: param
@@ -538,18 +583,17 @@ class HomeView extends Component {
             vodtoken    String  用于点播上传SDK的认证使用*/
                 //that.address = data.msg.addr;
                 /////$("#room").addClass("f-dn");
-                dataWin.account = username
+                
+                dataWin.account = data.ret.username
                 dataWin.sid = data.ret.sid
                 dataWin.token = data.ret.token
                 dataWin.vodtoken = data.ret.vodtoken
                 //记录登录状态到cookie
-                util.setCookie("vAccount", dataWin.account)
-                util.setCookie("vToken", dataWin.token)
-                util.setCookie("sid", dataWin.sid)
+                
+                
                 this.closeLogin();
-                this.getRoomEnter(dataWin.sid)
+                this.getRoomEnter(dataWin.sid, isSelf)
             } else {
-                //$("#loginBtn").html('登录').removeAttr('disabled')
                 if (data.code === 407) {
                     this.refs.toast.showToast("账号不存在")
                 } else {
@@ -568,16 +612,15 @@ class HomeView extends Component {
                     login: false
                 }
             })
-            //$("#loginBtn").html('登录').removeAttr('disabled');
         }.bind(this));
     }
     
     /**
      * 观众获取房间看直播
      * @param  {String} sid session id,用于登录后的各类接口请求校验
-     * @param  {Boolen} isTourist 是否是游客模式
+     * @param  {Boolen} isSelf    是否帐号登录
      */
-    getRoomEnter(sid, isTourist) {
+    getRoomEnter(sid, isSelf) {
         let param = {
             sid: sid,
             needRoomAddress: true
@@ -591,32 +634,43 @@ class HomeView extends Component {
             param.pullUrl = dataWin.pullUrl;
         }
         $.ajax({
-            url: "http://10.240.76.73:8088/room/enter",
+            url: config.enter,
             contentType:"application/x-www-form-urlencoded",
             type: 'POST',
             data: param
         }).done(function(data) {
             console.info('dtata',data)
             if(data.code===200){
+                dataWin.isTourist = !isSelf
+                if (!dataWin.isTourist) {
+                    util.setCookie("vAccount", dataWin.account)
+                    util.setCookie("vToken", dataWin.token)
+                    util.setCookie("isTourist", 'false')
+                }
+                util.setCookie("sid", dataWin.sid)
                 this.closeLogin()//关闭登录框
                 dataWin.roomid = data.ret.roomid
                 if (data.ret.status === 1) {
-                    if (!isTourist) {
-                        this.refs.video.playUrl(data.ret.hlsPullUrl)//开始播放
-                    }
-                } else {
+                    this.refs.video.playUrl(data.ret.hlsPullUrl)//开始播放
+                } else if (data.ret.status === 0 && !data.ret.valid) {
                     this.refs.video.onEnded()
+                } else {
+                    this.refs.video.showError('主播正在赶来的路上')
                 }
                 //连接聊天室
                 if (data.ret.addr && data.ret.addr[0]) {
                     this.doLink(data.ret.addr)
                 }
             }else{
+                dataWin.isTourist = true
                 util.delCookie('vAccount')
                 util.delCookie('vToken')
                 util.delCookie('sid')
-                alert(data.msg)
-                //window.location.reload()
+                if (data.code == 501) {
+                    this.refs.video.onEnded()
+                } else {
+                   alert(data.msg) 
+                }
             }   
         }.bind(this))
     }
@@ -658,7 +712,7 @@ class HomeView extends Component {
             nickname: nickname  
         };
         $.ajax({
-            url: 'http://10.240.76.73:8088/user/reg',
+            url: config.reg,
             type: 'POST',
             data: params,
             contentType: 'application/x-www-form-urlencoded',
@@ -747,6 +801,16 @@ class HomeView extends Component {
     }
 
     /**
+     * 关闭页面
+     */
+    closePage() {
+        if (window.history.length > 0 && util.getIdTag('back')) {
+            window.history.back()
+        }
+        window.opener=null;window.open('about:blank','_self','').close();
+    }
+
+    /**
      * 赠送玫瑰
      * @return {Number} 玫瑰数量
      */
@@ -756,102 +820,150 @@ class HomeView extends Component {
         })
     }
 
+    /**
+     * 点赞效果
+     */
+    giveHeart() {
+        console.info(1111,this,this.state.show.giveHeart)
+        if (this.state.show.giveHeart) {
+            return
+        }
+        page.giveHeart(this);
+        this.setState({
+            show: {
+                giveHeart: true
+            }
+        })
+        if (this.alternate) { //如果存在就重新开始动画
+            this.alternate.restart();
+        } else {
+            this.alternate = anime({
+                targets: '#heart',
+                //opacity: [1, 0],
+                translateY: -200,
+                translateX: -20,
+                duration: 2000,
+                complete: function() {
+                    console.info(888,this)
+                    this.setState({
+                        show: {
+                            giveHeart: false
+                        }
+                    })
+                }.bind(this)
+            });
+        }
+    }
+
     render() {
         return (
             <div>
-                <VideoPlayer ref="video" props={this.state} />
-                <div className="m-room">
-                    <div className="u-clearfix">
-                        <span className="avatar">
-                            <img src={this.state.avatar} />
-                        </span>
-                        <span className="detail">
-                            <p className="title">{this.state.roomCreator}</p>
-                            <p className="desc">房间号：<span id="roomCreator">{dataWin.roomid}</span></p>
-                        </span>
-                    </div>
-                    <div className="person-num">{this.state.num}人</div>
-                    <b></b>
-                    <div className={this.state.show.loadingStatus ? 'chat chat-loading' : 'chat chat-loading f-dn'}>{this.state.show.loadingStatus}</div>
-                    <div className={this.state.show.loadingStatus ? 'chat j-chat f-dn' : 'chat j-chat'} ref="chat"></div>
-                    <div className="like-icon"></div>
-                    <div className="edit">
-                        <div className={this.state.loginStatus ? 'u-title-line f-dn' : 'u-title-line'}></div>
-                        {!this.state.loginStatus ? 
-                            <div className="u-clearfix">
-                                <div className="edit-info" onTouchEnd={this.isLogin.bind(this, 1)}></div>
-                                <div className="edit-gift" onTouchEnd={this.isLogin.bind(this, 2)}></div>
-                            </div>
-                            :
-                            <div className="enter-textarea">
-                                <textarea className="edit-text" ref="textInput" value={this.state.sendValue} onChange={this.handleChange.bind(this)} onBlur={this.inputBlur.bind(this)}></textarea>
-                                <span className={this.state.sendStatus.send ? 'chat-btn' : 'chat-btn chat-disabled-btn'} onTouchEnd={page.sendText.bind(this, this.state.sendValue)}>发送</span>
-                            </div>
-                        }
-                    </div>
-                    <div className={this.state.show.giftStatus ? 'gift-box' : 'gift-box f-dn'}>
-                        <div className="over-load" onTouchStart={this.closeGift.bind(this)}></div>
-                        <ul className="list u-clearfix">
-                            <li className={this.state.giftNum === 1 ? 'cur' : ''} onClick={this.checkNum.bind(this, 1)}>
-                                <span className="flower-icon"></span>
-                                <p className="text">玫瑰x1</p>
-                            </li>
-                            <li className={this.state.giftNum === 10 ? 'cur' : ''} onClick={this.checkNum.bind(this, 10)}>
-                                <span className="flower-icon"></span>
-                                <p className="text">玫瑰x10</p>
-                            </li>
-                            <li className={this.state.giftNum === 15 ? 'cur' : ''} onClick={this.checkNum.bind(this, 15)}>
-                                <span className="flower-icon"></span>
-                                <p className="text">玫瑰x15</p>
-                            </li>
-                            <li className={this.state.giftNum === 99 ? 'cur' : ''} onClick={this.checkNum.bind(this, 99)}>
-                                <span className="flower-icon"></span>
-                                <p className="text">玫瑰x99</p>
-                            </li>
-                            <span className="gift-send" onTouchEnd={page.showGift.bind(this, this.state.giftNum)}>赠送</span>
-                        </ul>
+            {dataWin.isWeixin ? 
+                <div className="m-bg">
+                    <div className="wx">
+                        <p className="text">选择在{dataWin.isIos ? 'Safair' : '浏览器'}中打开</p>
                     </div>
                 </div>
-                <div className={(this.state.login.loginDialog || this.state.login.registDialog) ? 'u-login' : 'u-login f-dn'}>
-                    <div className="over-load j-over" onTouchStart={this.closeLogin.bind(this)}></div>
-                    <div className="blur-bg"></div>
-                    <div className={this.state.login.loginDialog ? 'wrap j-login' : 'wrap j-login f-dn'}>
-                        <div className="row">
-                            <span className="icon icon-account"></span>
-                            <input type="text" className="ipt j-account" value={this.state.login.username} placeholder="请输入帐号" onChange={this.handleChangeInput.bind(this, "login", "username")} autoComplete="off" />
+                :
+                <div>
+                    <VideoPlayer ref="video" props={this.state} param={dataWin} closePage={this.closePage} />
+                    <div className="m-room">
+                        <div className="u-clearfix">
+                            <span className="avatar">
+                                <img src={this.state.avatar} />
+                            </span>
+                            <span className="detail">
+                                <p className="title">{this.state.roomCreator}</p>
+                                <p className="desc">房间号：<span id="roomCreator">{dataWin.roomid}</span></p>
+                            </span>
                         </div>
-                        <div className="row">
-                            <span className="icon icon-pwd"></span>
-                            <input type="password" className="ipt" placeholder="请输入密码" value={this.state.login.password} onChange={this.handleChangeInput.bind(this, "login", "password")} autoComplete="off" />
+                        <div className="person-num">{this.state.num}人</div>
+                        <span className="close-icon" onClick={this.closePage.bind(this)}></span>
+                        <div className={this.state.show.loadingStatus ? 'chat chat-loading' : 'chat chat-loading f-dn'}>{this.state.show.loadingStatus}</div>
+                        <div className={this.state.show.loadingStatus ? 'chat j-chat f-dn' : 'chat j-chat'} ref="chat"></div>
+                        <div className="like-icon" onClick={this.isLogin.bind(this, 3)}>
+                            <div className={this.state.show.giveHeart ? 'heart' : 'heart f-dn'} id="heart" ref="heart"></div>
                         </div>
-                        <div className="row">
-                            <span className={this.state.sendStatus.login ? 'btn disabled-btn' : 'btn'} onClick={this.validateLogin.bind(this)}><span>登录</span></span>
+                        <div className="edit">
+                            <div className={this.state.loginStatus ? 'u-title-line f-dn' : 'u-title-line'}></div>
+                            {!this.state.loginStatus ? 
+                                <div className="u-clearfix">
+                                    <div className="edit-info" onTouchEnd={this.isLogin.bind(this, 1)}></div>
+                                    <div className="edit-gift" onTouchEnd={this.isLogin.bind(this, 2)}></div>
+                                </div>
+                                :
+                                <div className="enter-textarea">
+                                    <textarea className="edit-text" ref="textInput" value={this.state.sendValue} onChange={this.handleChange.bind(this)} onBlur={this.inputBlur.bind(this)}></textarea>
+                                    <span className={this.state.sendStatus.send ? 'chat-btn' : 'chat-btn chat-disabled-btn'} onTouchEnd={page.sendText.bind(this, this.state.sendValue)}>发送</span>
+                                </div>
+                            }
                         </div>
-                        <a className="action" onClick={this.changeLogin.bind(this, true)}>快速注册 ></a>
+                        <div className={this.state.show.giftStatus ? 'gift-box' : 'gift-box f-dn'}>
+                            <div className="over-load" onTouchStart={this.closeGift.bind(this)}></div>
+                            <div className="blur-bg"></div>
+                            <ul className="list u-clearfix">
+                                <li className={this.state.giftNum === 1 ? 'cur' : ''} onClick={this.checkNum.bind(this, 1)}>
+                                    <span className="flower-icon"></span>
+                                    <p className="text">玫瑰x1</p>
+                                </li>
+                                <li className={this.state.giftNum === 10 ? 'cur' : ''} onClick={this.checkNum.bind(this, 10)}>
+                                    <span className="flower-icon"></span>
+                                    <p className="text">玫瑰x10</p>
+                                </li>
+                                <li className={this.state.giftNum === 15 ? 'cur' : ''} onClick={this.checkNum.bind(this, 15)}>
+                                    <span className="flower-icon"></span>
+                                    <p className="text">玫瑰x15</p>
+                                </li>
+                                <li className={this.state.giftNum === 99 ? 'cur' : ''} onClick={this.checkNum.bind(this, 99)}>
+                                    <span className="flower-icon"></span>
+                                    <p className="text">玫瑰x99</p>
+                                </li>
+                                <span className="gift-send" onTouchEnd={page.showGift.bind(this, this.state.giftNum)}>赠送</span>
+                            </ul>
+                        </div>
                     </div>
-                    <div className={this.state.login.registDialog ? 'wrap j-regist' : 'wrap j-regist f-dn'}>
-                        <div className="row">
-                            <span className="icon icon-account"></span>
-                            <input type="text" className="ipt j-account2" placeholder="帐号限20位字母或者数字" maxLength="20" value={this.state.regist.username} onChange={this.handleChangeInput.bind(this, "regist", "username")} autoComplete="off" />
+                    <div className={(this.state.login.loginDialog || this.state.login.registDialog) ? 'u-login' : 'u-login f-dn'}>
+                        <div className="over-load j-over" onTouchStart={this.closeLogin.bind(this)}></div>
+                        <div className={this.state.login.loginDialog ? 'blur-bg' : 'blur-bg blur-bg2'}></div>
+                        <div className={this.state.login.loginDialog ? 'wrap j-login' : 'wrap j-login f-dn'}>
+                            <div className="row">
+                                <span className="icon icon-account"></span>
+                                <input type="text" className="ipt j-account" value={this.state.login.username} placeholder="请输入帐号" onChange={this.handleChangeInput.bind(this, "login", "username")} autoComplete="off" onFocus={this.focusInput.bind(this)} onBlur={this.blurInput.bind(this)}/>
+                            </div>
+                            <div className="row">
+                                <span className="icon icon-pwd"></span>
+                                <input type="password" className="ipt" placeholder="请输入密码" value={this.state.login.password} onChange={this.handleChangeInput.bind(this, "login", "password")} autoComplete="off" onFocus={this.focusInput.bind(this)} onBlur={this.blurInput.bind(this)} />
+                            </div>
+                            <div className="row">
+                                <span className={this.state.sendStatus.login ? 'btn disabled-btn' : 'btn'} onClick={this.validateLogin.bind(this)}><span>登录</span></span>
+                            </div>
+                            <a className="action" onClick={this.changeLogin.bind(this, true)}>快速注册 ></a>
                         </div>
-                        <div className="row">
-                            <span className="icon icon-pwd"></span>
-                            <input type="text" className="ipt j-nick" placeholder="昵称限10位汉字、字母或者数字" maxLength="10" value={this.state.regist.nickname}  onChange={this.handleChangeInput.bind(this, "regist", "nickname")} autoComplete="off" />
+                        <div className={this.state.login.registDialog ? 'wrap j-regist' : 'wrap j-regist f-dn'}>
+                            <div className="row">
+                                <span className="icon icon-account"></span>
+                                <input type="text" className="ipt j-account2" placeholder="帐号限20位字母或者数字" maxLength="20" value={this.state.regist.username} onChange={this.handleChangeInput.bind(this, "regist", "username")} autoComplete="off" onFocus={this.focusInput.bind(this)} onBlur={this.blurInput.bind(this)}/>
+                            </div>
+                            <div className="row">
+                                <span className="icon icon-nick"></span>
+                                <input type="text" className="ipt j-nick" placeholder="昵称限10位汉字、字母或者数字" maxLength="10" value={this.state.regist.nickname}  onChange={this.handleChangeInput.bind(this, "regist", "nickname")} autoComplete="off" onFocus={this.focusInput.bind(this)} onBlur={this.blurInput.bind(this)}/>
+                            </div>
+                            <div className="row">
+                                <span className="icon icon-pwd"></span>
+                                <input type="password" className="ipt j-password2" placeholder="密码限6~20位字母或者数字"  maxLength="20" value={this.state.regist.password} onChange={this.handleChangeInput.bind(this, "regist", "password")} autoComplete="off" onFocus={this.focusInput.bind(this)} onBlur={this.blurInput.bind(this)}/>
+                            </div>
+                            <div className="row">
+                                <div className="errorMsg j-errmsg2 f-dn"></div>
+                            </div>
+                            <div className="row">
+                                <span className={this.state.sendStatus.regist ? 'btn disabled-btn' : 'btn'} onClick={this.validateRegist.bind(this)}><span>注册</span></span>
+                            </div>
+                            <a className="action" onClick={this.changeLogin.bind(this, false)}>已有帐号？直接登录 ></a>
                         </div>
-                        <div className="row">
-                            <span className="icon icon-pwd"></span>
-                            <input type="password" className="ipt j-password2" placeholder="密码限6~20位字母或者数字"  maxLength="20" value={this.state.regist.password} onChange={this.handleChangeInput.bind(this, "regist", "password")} autoComplete="off" />
-                        </div>
-                        <div className="row">
-                            <div className="errorMsg j-errmsg2 f-dn"></div>
-                        </div>
-                        <div className="row">
-                            <span className={this.state.sendStatus.regist ? 'btn disabled-btn' : 'btn'} onClick={this.validateRegist.bind(this)}><span>注册</span></span>
-                        </div>
-                        <a className="action" onClick={this.changeLogin.bind(this, false)}>已有帐号？直接登录 ></a>
                     </div>
+                    <Toast ref="toast" />
                 </div>
-                <Toast ref="toast" />
+            }
             </div>
         );
     }

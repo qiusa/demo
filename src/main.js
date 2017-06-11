@@ -8,7 +8,6 @@ import AppContainer from './containers/AppContainer'
 // ========================================================
 const initialState = window.___INITIAL_STATE__
 const store = createStore(initialState)
-
 // ========================================================
 // Render Setup
 // ========================================================

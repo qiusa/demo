@@ -289,6 +289,24 @@ var page = {
 		}.bind(this))
 	},
 	/**
+	 * 点赞
+	 */
+	giveHeart: function(obj) {
+		console.info('坑里')
+		var content = {
+			type: 2,
+			data: {}
+		};
+		//obj指向homeView
+		obj.sendCustomMessage(content, function(err, data) {
+			if (err) {
+				alert(err.message);
+			} else {
+				page.buildChat([data], "msgs");
+			}
+		}.bind(this))
+	},
+	/**
 	 * 发送礼物
 	 */
 	showGift: function(num) {
@@ -307,7 +325,8 @@ var page = {
 			} else {
 				page.buildChat([data], "msgs");
 			}
-		})
+			this.closeGift();
+		}.bind(this))
 	},
 	showEmoji: function() {
 		this.$emNode._$show();
@@ -340,16 +359,25 @@ var page = {
 		}
 	},
 	// 聊天页面绘制
-	buildChat: function(data, type) {
+	buildChat: function(data, type, obj) {
+		console.info('ddddddd',data,type)
 		var html = "",
 			item,
-			prepend = false;
+			prepend = false,
+			content;
 		data.sort(function(a, b) {
 			return a.time - b.time;
 		});
 		if (type === "msgs") {
 			for (var i = 0; i < data.length; i++) {
 				item = data[i];
+				console.info('999222',item,item.content)
+				if (item && item.content) {
+					content = JSON.parse(item.content);
+				}
+				if (content && content.type === 2) {
+					continue;
+				}
 				if (this.$chat.find('.item[data-id="' + item.idClient + '"]').length) {
 					continue;
 				}
@@ -368,6 +396,12 @@ var page = {
 			// 历史消息
 			for (var i = 0; i < data.length; i++) {
 				item = data[i];
+				if (item && item.content) {
+					content = JSON.parse(item.content);
+				}
+				if (content && content.type === 2) {
+					continue;
+				}
 				if (this.$chat.find('.item[data-id="' + item.idClient + '"]').length) {
 					continue;
 				}

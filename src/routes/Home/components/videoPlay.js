@@ -3,12 +3,13 @@
  */
 import React, {
     Component
-} from 'react';
+} from 'react'
 import ReactDOM, {
     render
-} from 'react-dom';
-import videojs from 'video.js';
-import 'video.js/dist/video-js.css';
+} from 'react-dom'
+import config from '../../../components/config.js'
+import videojs from 'video.js'
+import 'video.js/dist/video-js.css'
 class VideoPlay extends Component {
     state = {
         msg: '加载中。。。', //提示信息
@@ -21,7 +22,9 @@ class VideoPlay extends Component {
      * @param  {String} hlsPullUrl 播放地址
      */
     playUrl(hlsPullUrl) {
-        console.info('hlsPullUrl', hlsPullUrl)
+        if (this.state.playStatus) {
+            return
+        }
         this.showError('加载中。。。')
         this.player = videojs(this.refs.myVideo, {
             controls: true,
@@ -33,12 +36,12 @@ class VideoPlay extends Component {
                 customControlSpacer: true
             }
         }, function() {
-            this.initPlayerEvent();
+            this.initPlayerEvent()
             let src = {
                 src: hlsPullUrl,
                 type: 'application/x-mpegURL'
-            };
-            this.player.src(src);
+            }
+            this.player.src(src)
         }.bind(this))
     }
 
@@ -46,13 +49,10 @@ class VideoPlay extends Component {
      * 播放视频
      */
     play() {
-        this.player.play();
+        this.player.play()
         this.setState({
             playStatus: false
-        })
-        console.info(this.refs.myVideo)
-            //this.refs.myVideo.cancelFullScrren();  
-            //this.refs.myVideo.webkitCancelFullScreen();      
+        })     
     }
 
     /**
@@ -72,92 +72,114 @@ class VideoPlay extends Component {
             this.setState({
                 playStatus: true
             })
-        }.bind(this));
+        }.bind(this))
         this.player.on('ended', function() {
             console.info('end')
             self.onEnded()
-        });
+        })
         this.player.on('error', function() {
             this.showError('直播出错啦')
-        }.bind(this));
+        }.bind(this))
         this.player.on('timeupdate', function() {
-            console.info('time', this.player.currentTime())
-            if (!this.ended) {
-                var currTime = this.player.currentTime();
-                // console.log(currTime, this.lastTime);
-                if (currTime === this.lastTime) {
-                    this.maybeEnded();
-                }
-                this.lastTime = currTime;
+            if (!this.state.isEnd) {
+                var currTime = this.player.currentTime()
+                //currTime有小数点无法精确判断 2s后延时判断增加精确度
+                setTimeout(function() {
+                    if (currTime != 0 && parseInt(currTime) === parseInt(this.lastTime)) {
+                        this.maybeEnded()
+                    }
+                }.bind(this), 2000)
+                
+                this.lastTime = currTime
             }
-        }.bind(this));
+        }.bind(this))
     }
 
+
+    /**
+     * 通过请求再次确定直播状态
+     */
     maybeEnded() {
         // 检查直播是否结束
         if (this.queryingEnded) {
-            return;
+            return
         }
-        this.queryingEnded = true;
-        console.log('queryingEnded');
-        $.ajax(config.queryVideoLiveStatusUrl, {
-            method: 'GET',
-            data: {
-                appkey: config.appkey,
-                cid: this.liveInfo.cid,
-                time: +new Date()
-            },
-            dataType: 'json',
-            error: function(xhr, type, text) {
-                this.showError(text);
-            },
-            success: function(obj) {
-                if (obj.res === 200) {
-                    this.options.status = obj.msg.status;
-                    if (!this.videoIsLiving()) {
-                        this.onEnded();
-                    }
-                    setTimeout(function() {
-                        this.queryingEnded = false;
-                    }, 3000)
+        this.queryingEnded = true
+        let param = {
+            sid: this.props.param.sid,
+            roomid: this.props.param.roomid,
+            needRoomAddress: true
+        };
+        $.ajax({
+            url: config.enter,
+            contentType:"application/x-www-form-urlencoded",
+            type: 'POST',
+            data: param
+        }).done(function(data) {
+            console.info('dtata',data)
+            if(data.code===200){
+                if (data.ret.status === 1) {
+
+                } else if (data.ret.status === 0 && !data.ret.valid) {
+                    this.onEnded()
                 } else {
-                    this.showError(obj.errmsg);
+                    this.showError('主播正在赶来的路上')
+                }
+            }else{
+                if (data.code == 501) {
+                    this.onEnded()
+                } else {
+                   alert(data.msg) 
                 }
             }
-
-        });
+            this.queryingEnded = false
+        }.bind(this)).fail(function() {
+            this.queryingEnded = false
+            alert('系统超时')
+        }.bind(this))
     }
 
     showError(msg) {
-        console.info(this, '00======')
         this.setState({
             msg: msg
         })
     }
 
+    msgClass() {
+        if (this.state.msg) {
+            if (this.state.isEnd) {
+                return 'video-tip tip-index'
+            } else {
+                return 'video-tip'
+            }
+        } else {
+            return 'video-tip f-dn'
+        }
+    }
+
     render() {
         return (
             <div className="m-play">
-                <div className={this.state.msg ? 'video-tip' : 'video-tip f-dn'}>
+                <div className={this.msgClass()}>
                     {this.state.isEnd ? 
                         <div className="end">
                             <span className="end-avatar">
                                 <img src={this.props.props.avatar} />
                             </span>
                             <p className="end-nick">{this.props.props.roomCreator}</p>
-                            <p className="end-text">{this.msg}</p>
-                            <span className="end-btn">关闭</span>    
+                            <p className="end-text">{this.state.msg}</p>
+                            <span className="end-btn" onClick={this.props.closePage}>关闭</span>    
                         </div>
                         :
                         <p className="p-text">{this.state.msg}</p>
                     }
                 </div>
-                <div className="play-main">
+                <div className={this.state.msg ? 'play-main f-dn' : 'play-main'}>
                     <video className="video video-js vjs-default-skin vjs-big-play-center" ref="myVideo"/* x-webkit-airplay="true" webkit-playsinline="true" */ playsInline></video>
                 </div>
                 <div className={this.state.playStatus ? 'play-btn' : 'play-btn f-dn'} onClick={this.play.bind(this)}></div>
             </div>
-        );
+        )
     }
 }
 

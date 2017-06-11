@@ -242,6 +242,22 @@ var util = {
             }
         }
         return _id;
+    },
+    isWeixin: function() {
+        var ua = navigator.userAgent.toLowerCase();
+        if (ua.indexOf('micromessenger') !== -1) {
+            return true;
+        } else {
+            return false;
+        }
+    },
+    isIos: function() {
+        var ua = navigator.userAgent.toLowerCase();
+        if (ua.indexOf('iphone') !== -1 || ua.indexOf('ipad') !== -1) {
+            return true;
+        } else {
+            return false;
+        }
     }
 };
 export default util;

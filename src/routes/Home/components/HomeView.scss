@@ -35,6 +35,10 @@
         text-shadow: 0 1px 1px rgba(0,0,0,.40);
         .title {
             padding: 6px 0 4px;
+            overflow:hidden;text-overflow:ellipsis;
+            white-space: nowrap;
+            width: pxTorem(95);
+            height: 24px;
         }
         .desc {
             font-size: 12px;
@@ -58,6 +62,27 @@
         text-shadow: 0 1px 1px rgba(0,0,0,.40);
     }
     //关闭按钮
+    .close-icon {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+
+        display: inline-block;
+
+        width: 44px;
+        height: 44px;
+
+        -webkit-transform: scale(.5);
+            -ms-transform: scale(.5);
+             -o-transform: scale(.5);
+                transform: scale(.5);
+
+        background-image: url(../assets/sprite.png);
+        background-position: 0 -108px;
+    }
+    .close-icon:active {
+        background-position: 0 -152px;
+    }
     b {
         font-size: 0;
         line-height: 0;
@@ -251,8 +276,19 @@
 
         width: 100%;
         height: pxTorem(150);
+        padding-top: pxTorem(9);
+        .blur-bg {
+            position: absolute;
+            z-index: -1;
+            bottom: 0;
+            left: 0;
 
-        background: url(../assets/bottm@2x.png) center bottom no-repeat;
+            width: 100%;
+            height: pxTorem(150);
+
+            opacity: .8;
+            background: #000;
+        }
         .list {
             position: relative;
             z-index: 98;
@@ -261,8 +297,10 @@
             li {
                 float: left;
 
-                width: pxTorem(92);
-                height: pxTorem(95);
+                width: pxTorem(90);
+                height: pxTorem(93);
+
+                border: pxTorem(1) solid transparent;
 
                 text-align: center;
                 .flower-icon {
@@ -284,7 +322,11 @@
                 }
             }
             .cur {
-                background: #fff;
+                width: pxTorem(90);
+                height: pxTorem(93);
+
+                border: pxTorem(1) solid #238efa;
+                background: #000;
             }
         }
         .gift-send {
@@ -339,13 +381,10 @@
         width: 100%;
         height: pxTorem(250);
 
-        background: url(../assets/bottm@2x.png) bottom center no-repeat #000;
-
-        -webkit-filter: blur(10px); /* Chrome, Opera */
-           -moz-filter: blur(10px);
-            -ms-filter: blur(10px);
-                filter: blur(10px);
+        opacity: .8;
+        background: #000;
     }
+    .blur-bg2{height: pxTorem(300)}
     .wrap {
         position: absolute;
         bottom: 0;
@@ -358,27 +397,38 @@
         .icon {
             display: inline-block;
 
-            width: 18px;
-            height: 18px;
+            width: 36px;
+            height: 36px;
 
             vertical-align: middle;
 
-            background-image: url(../assets/icons.png);
+            background-image: url(../assets/sprite.png);
             background-repeat: no-repeat;
+            -webkit-transform: scale(.5);
+            -ms-transform: scale(.5);
+             -o-transform: scale(.5);
+                transform: scale(.5);
         }
         .icon-account {
             position: absolute;
-            top: pxTorem(11);
-            left: pxTorem(6);
+            top: pxTorem(2);
+            left: pxTorem(-3);
 
-            background-position: 0 -112px;
+            background-position: 0 0;
         }
         .icon-pwd {
             position: absolute;
-            top: pxTorem(11);
-            left: pxTorem(6);
+            top: pxTorem(2);
+            left: pxTorem(-3);
 
-            background-position: 0 -133px;
+            background-position: 0 -36px;
+        }
+        .icon-nick {
+            position: absolute;
+            top: pxTorem(2);
+            left: pxTorem(-3);
+
+            background-position: 0 -72px;
         }
         .tt {
             font-size: 16px;
@@ -506,13 +556,14 @@
     .play-btn {
         position: absolute;
         z-index: 9999;
-        top: 50px;
-        left: 40px;
+        top: 50%;
+        left: 50%;
 
-        width: 60px;
-        height: 60px;
-
-        background: #ccc;
+        width: 80px;
+        height: 80px;
+        margin: -40px 0 0 -40px;
+        background: url(../assets/icon_play.png) no-repeat;
+        background-size: contain;
     }
     .play-main {
         position: absolute;
@@ -528,7 +579,7 @@
     }
     .video-tip {
         position: absolute;
-        z-index: 1;
+        z-index: -1;
         top: 0;
         right: 0;
         bottom: 0;
@@ -543,10 +594,11 @@
             bottom: 0;
             left: 0;
             .end-avatar {
+                display: block;
+
                 width: pxTorem(120);
                 height: pxTorem(120);
                 margin: pxTorem(78) auto 0;
-                display: block;
                 img {
                     width: 100%;
                 }
@@ -573,11 +625,14 @@
             }
             .end-btn {
                 font-size: 14px;
+                line-height: pxTorem(30);
+
                 display: block;
+
                 width: pxTorem(60);
                 height: pxTorem(30);
                 margin: pxTorem(40) auto 0;
-                line-height: pxTorem(30);
+
                 text-align: center;
 
                 color: #fff;
@@ -598,4 +653,52 @@
             color: #fff;
         }
     }
+    .tip-index{
+        z-index: 1;
+    }
+}
+.heart {
+    position: relative;
+
+    width: 100px;
+    height: 90px;
+}
+.heart:before,
+.heart:after {
+    position: absolute;
+    top: 0;
+    left: 50px;
+
+    width: 50px;
+    height: 80px;
+
+    content: '';
+    -webkit-transform: rotate(-45deg);
+       -moz-transform: rotate(-45deg);
+        -ms-transform: rotate(-45deg);
+         -o-transform: rotate(-45deg);
+            transform: rotate(-45deg);
+    -webkit-transform-origin: 0 100%;
+       -moz-transform-origin: 0 100%;
+        -ms-transform-origin: 0 100%;
+         -o-transform-origin: 0 100%;
+            transform-origin: 0 100%;
+
+    -moz-border-radius: 50px 50px 0 0;
+         border-radius: 50px 50px 0 0;
+    background: red;
+}
+.heart:after {
+    left: 0;
+
+    -webkit-transform: rotate(45deg);
+       -moz-transform: rotate(45deg);
+        -ms-transform: rotate(45deg);
+         -o-transform: rotate(45deg);
+            transform: rotate(45deg);
+    -webkit-transform-origin: 100% 100%;
+       -moz-transform-origin: 100% 100%;
+        -ms-transform-origin: 100% 100%;
+         -o-transform-origin: 100% 100%;
+            transform-origin: 100% 100%;
 }

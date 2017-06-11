@@ -1,5 +1,9 @@
 @import 'base';
 @import '~normalize.css/normalize';
+@function pxTorem($px) {
+    //$px为需要转换的字号
+    @return $px / 37.5 * 1rem;
+}
 // Some best-practice CSS that's useful for most apps
 // Just remove them if they're not what you want
 html {
@@ -23,6 +27,11 @@ body{
 *:before,
 *:after {
   box-sizing: inherit;
+}
+a,span,div{
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 ::-webkit-input-placeholder { /* WebKit browsers */
     color: #999;
@@ -60,3 +69,27 @@ a{
 .text-center{
   text-align: center;
 }
+.m-bg{
+    background: #F7F7F7;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    .wx{
+      background: url(../static/images/wx.png) no-repeat;
+      width: pxTorem(375);
+      height: pxTorem(234);
+      background-size: contain;
+
+      .text{
+        position: absolute;
+        left: pxTorem(98);
+        top:pxTorem(125);
+        text-align: center;
+        font-size: pxTorem(17);
+        color: #333333;
+      }
+    }
+}
+    
