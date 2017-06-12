@@ -123,9 +123,18 @@ export default class Zen extends Component {
                 window.location.href = '/?back=' + new Date().getTime() + '&roomid=' + data.ret.roomid
             }else{
                 if (this.state.index === 1) {
-                    alert('房间号不存在')
+                    if (data.code === 501) {
+                        alert('直播已结束')
+                    } else {
+                        alert('房间号不存在')
+                    }
+                    
                 } else {
-                    alert('拉流地址不存在')
+                    if (data.code === 501) {
+                        alert('直播已结束')
+                    } else {
+                        alert('拉流地址不存在')
+                    }
                 }
             }
             this.setState({

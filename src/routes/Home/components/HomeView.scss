@@ -64,24 +64,20 @@
     //关闭按钮
     .close-icon {
         position: absolute;
-        top: 10px;
+        top: 20px;
         right: 10px;
 
         display: inline-block;
 
-        width: 44px;
-        height: 44px;
+        width: 22px;
+        height: 22px;
 
-        -webkit-transform: scale(.5);
-            -ms-transform: scale(.5);
-             -o-transform: scale(.5);
-                transform: scale(.5);
 
         background-image: url(../assets/sprite.png);
-        background-position: 0 -108px;
+        background-position: 0 -52px;
     }
     .close-icon:active {
-        background-position: 0 -152px;
+        background-position: 0 -74px;
     }
     b {
         font-size: 0;
@@ -163,45 +159,30 @@
         .edit-info {
             float: left;
 
-            width: 80px;
-            height: 80px;
-            margin: -10px 0 0 -20px;
-
-            -webkit-transform: scale(.5);
-                -ms-transform: scale(.5);
-                 -o-transform: scale(.5);
-                    transform: scale(.5);
+            width: 40px;
+            height: 40px;
+            margin-top: 10px;
 
             background-image: url(../assets/sprite.png);
-            background-position: 0 -644px;
+            background-position: 0 -322px;
         }
         .edit-info:active {
-            background-image: url(../assets/sprite.png);
-            background-position: 0 -324px;
+            background-position: 0 -162px;
         }
         .edit-gift {
             float: right;
 
-            width: 80px;
-            height: 80px;
-            margin: -10px -20px 0 0;
+            width: 40px;
+            height: 40px;
+            margin-top: 10px;
 
-            -webkit-transform: scale(.5);
-                -ms-transform: scale(.5);
-                 -o-transform: scale(.5);
-                    transform: scale(.5);
 
             background-image: url(../assets/sprite.png);
-            background-position: 0 -244px;
+            background-position: 0 -122px;
         }
         .edit-gift:active {
-            -webkit-transform: scale(.5);
-                -ms-transform: scale(.5);
-                 -o-transform: scale(.5);
-                    transform: scale(.5);
 
-            background-image: url(../assets/sprite.png);
-            background-position: 0 -484px;
+            background-position: 0 -242px;
         }
         .enter-textarea {
             position: absolute;
@@ -250,23 +231,21 @@
         }
     }
     .like-icon {
-        position: fixed;
+        position: absolute;
         right: pxTorem(10);
         bottom: pxTorem(70);
 
         display: block;
 
-        width: 80px;
-        height: 80px;
-        margin: 20px -20px 0 0;
-
-        -webkit-transform: scale(.5);
-            -ms-transform: scale(.5);
-             -o-transform: scale(.5);
-                transform: scale(.5);
+        width: 40px;
+        height: 40px;
+        margin: 20px 0 0 0;
 
         background-image: url(../assets/sprite.png);
-        background-position: 0 -724px;
+        background-position: 0 -202px;
+    }
+    .like-icon:active{
+        background-position: 0 -362px;
     }
     .gift-box {
         position: absolute;
@@ -397,38 +376,34 @@
         .icon {
             display: inline-block;
 
-            width: 36px;
-            height: 36px;
+            width: 18px;
+            height: 18px;
 
             vertical-align: middle;
 
             background-image: url(../assets/sprite.png);
             background-repeat: no-repeat;
-            -webkit-transform: scale(.5);
-            -ms-transform: scale(.5);
-             -o-transform: scale(.5);
-                transform: scale(.5);
         }
         .icon-account {
             position: absolute;
-            top: pxTorem(2);
-            left: pxTorem(-3);
+            top: pxTorem(10);
+            left: pxTorem(6);
 
             background-position: 0 0;
         }
         .icon-pwd {
             position: absolute;
-            top: pxTorem(2);
-            left: pxTorem(-3);
+            top: pxTorem(10);
+            left: pxTorem(6);
 
-            background-position: 0 -36px;
+            background-position: 0 -18px;
         }
         .icon-nick {
             position: absolute;
-            top: pxTorem(2);
-            left: pxTorem(-3);
+            top: pxTorem(10);
+            left: pxTorem(6);
 
-            background-position: 0 -72px;
+            background-position: 0 -36px;
         }
         .tt {
             font-size: 16px;

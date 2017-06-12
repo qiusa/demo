@@ -14,9 +14,17 @@ class VideoPlay extends Component {
     state = {
         msg: '加载中。。。', //提示信息
         playStatus: false, //播放按钮
-        isEnd: false //直播状态
+        isEnd: false, //直播状态
+        height: '100%',
+        attrPro: 'x-webkit-airplay="true" webkit-playsinline="true"'
     }
 
+    componentDidMount() {
+        this.setState({
+            height: window.innerHeight
+        })
+        //this.getDOMNode().setAttribute('itemtype', '---')
+    }
     /**
      * 初始化播放器
      * @param  {String} hlsPullUrl 播放地址
@@ -25,6 +33,8 @@ class VideoPlay extends Component {
         if (this.state.playStatus) {
             return
         }
+        
+        console.info('来啊来',this.state.height)
         this.showError('加载中。。。')
         this.player = videojs(this.refs.myVideo, {
             controls: true,
@@ -72,11 +82,21 @@ class VideoPlay extends Component {
             this.setState({
                 playStatus: true
             })
+            
+        }.bind(this))
+        this.player.on('play', function() {
+            this.player.requestFullScreen()
         }.bind(this))
         this.player.on('ended', function() {
             console.info('end')
             self.onEnded()
-        })
+        }.bind(this))
+        this.player.on('pause', function() {
+            this.setState({
+                playStatus: true
+            })
+        }.bind(this))
+         
         this.player.on('error', function() {
             this.showError('直播出错啦')
         }.bind(this))
@@ -158,6 +178,8 @@ class VideoPlay extends Component {
     }
 
     render() {
+        let props = {}
+        props.layout === 'horizontal'
         return (
             <div className="m-play">
                 <div className={this.msgClass()}>
@@ -175,7 +197,7 @@ class VideoPlay extends Component {
                     }
                 </div>
                 <div className={this.state.msg ? 'play-main f-dn' : 'play-main'}>
-                    <video className="video video-js vjs-default-skin vjs-big-play-center" ref="myVideo"/* x-webkit-airplay="true" webkit-playsinline="true" */ playsInline></video>
+                    <video className="video video-js vjs-default-skin vjs-big-play-center 2" ref="myVideo"/* x-webkit-airplay="true" webkit-playsinline="true" */ {...props} playsInline style={{height: this.state.height}}></video>
                 </div>
                 <div className={this.state.playStatus ? 'play-btn' : 'play-btn f-dn'} onClick={this.play.bind(this)}></div>
             </div>

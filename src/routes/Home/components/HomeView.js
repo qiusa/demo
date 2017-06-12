@@ -7,7 +7,6 @@ import ReactDOM, {
 import page from './room.js'
 import util from '../../../components/util.js'
 import config from '../../../components/config.js'
-import Notifications, {notify1} from 'react-notify-toast';
 import anime from './anime.js'
 import Toast from './toast.js';
 import VideoPlayer from './videoPlay.js';
@@ -810,6 +809,10 @@ class HomeView extends Component {
         window.opener=null;window.open('about:blank','_self','').close();
     }
 
+    videoStatus() {
+        
+    }
+
     /**
      * 赠送玫瑰
      * @return {Number} 玫瑰数量
@@ -866,7 +869,7 @@ class HomeView extends Component {
                 </div>
                 :
                 <div>
-                    <VideoPlayer ref="video" props={this.state} param={dataWin} closePage={this.closePage} />
+                    <VideoPlayer ref="video" props={this.state} param={dataWin} closePage={this.closePage} videoStatus={this.videoStatus} />
                     <div className="m-room">
                         <div className="u-clearfix">
                             <span className="avatar">
@@ -928,11 +931,11 @@ class HomeView extends Component {
                         <div className={this.state.login.loginDialog ? 'wrap j-login' : 'wrap j-login f-dn'}>
                             <div className="row">
                                 <span className="icon icon-account"></span>
-                                <input type="text" className="ipt j-account" value={this.state.login.username} placeholder="请输入帐号" onChange={this.handleChangeInput.bind(this, "login", "username")} autoComplete="off" onFocus={this.focusInput.bind(this)} onBlur={this.blurInput.bind(this)}/>
+                                <input type="text" className="ipt j-account" value={this.state.login.username} placeholder="请输入帐号" onChange={this.handleChangeInput.bind(this, "login", "username")} autoComplete="off"/>
                             </div>
                             <div className="row">
                                 <span className="icon icon-pwd"></span>
-                                <input type="password" className="ipt" placeholder="请输入密码" value={this.state.login.password} onChange={this.handleChangeInput.bind(this, "login", "password")} autoComplete="off" onFocus={this.focusInput.bind(this)} onBlur={this.blurInput.bind(this)} />
+                                <input type="password" className="ipt" placeholder="请输入密码" value={this.state.login.password} onChange={this.handleChangeInput.bind(this, "login", "password")} autoComplete="off"/>
                             </div>
                             <div className="row">
                                 <span className={this.state.sendStatus.login ? 'btn disabled-btn' : 'btn'} onClick={this.validateLogin.bind(this)}><span>登录</span></span>
@@ -942,15 +945,15 @@ class HomeView extends Component {
                         <div className={this.state.login.registDialog ? 'wrap j-regist' : 'wrap j-regist f-dn'}>
                             <div className="row">
                                 <span className="icon icon-account"></span>
-                                <input type="text" className="ipt j-account2" placeholder="帐号限20位字母或者数字" maxLength="20" value={this.state.regist.username} onChange={this.handleChangeInput.bind(this, "regist", "username")} autoComplete="off" onFocus={this.focusInput.bind(this)} onBlur={this.blurInput.bind(this)}/>
+                                <input type="text" className="ipt j-account2" placeholder="帐号限20位字母或者数字" maxLength="20" value={this.state.regist.username} onChange={this.handleChangeInput.bind(this, "regist", "username")} autoComplete="off"/>
                             </div>
                             <div className="row">
                                 <span className="icon icon-nick"></span>
-                                <input type="text" className="ipt j-nick" placeholder="昵称限10位汉字、字母或者数字" maxLength="10" value={this.state.regist.nickname}  onChange={this.handleChangeInput.bind(this, "regist", "nickname")} autoComplete="off" onFocus={this.focusInput.bind(this)} onBlur={this.blurInput.bind(this)}/>
+                                <input type="text" className="ipt j-nick" placeholder="昵称限10位汉字、字母或者数字" maxLength="10" value={this.state.regist.nickname}  onChange={this.handleChangeInput.bind(this, "regist", "nickname")} autoComplete="off"/>
                             </div>
                             <div className="row">
                                 <span className="icon icon-pwd"></span>
-                                <input type="password" className="ipt j-password2" placeholder="密码限6~20位字母或者数字"  maxLength="20" value={this.state.regist.password} onChange={this.handleChangeInput.bind(this, "regist", "password")} autoComplete="off" onFocus={this.focusInput.bind(this)} onBlur={this.blurInput.bind(this)}/>
+                                <input type="password" className="ipt j-password2" placeholder="密码限6~20位字母或者数字"  maxLength="20" value={this.state.regist.password} onChange={this.handleChangeInput.bind(this, "regist", "password")} autoComplete="off"/>
                             </div>
                             <div className="row">
                                 <div className="errorMsg j-errmsg2 f-dn"></div>
