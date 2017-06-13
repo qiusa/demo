@@ -9,9 +9,6 @@ class PageNotFound extends Component {
     return (
       <div className={classes.container}>
         <h1>Page not found!!!</h1>
-        <h3>
-          <a className={classes.link} onClick={props.router.goBack}>Back</a>
-        </h3>
       </div>
     )
   }

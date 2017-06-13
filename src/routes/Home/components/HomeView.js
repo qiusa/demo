@@ -29,18 +29,14 @@ let dataWin = {
     isTourist: true, //是否是游客模式
     pullUrl: '',
     person: {},
-    appkey: '45c6af3c98409b18a84451215d0bdd6e',
+    appkey22: '5c24f9c7198c75ce8086a3af99e7a394',//测试
     token: '',
     roomid2: '9213830',
-    appkey2: '71c281ff6ab950e47a2f6f60d4378d9f',
+    appkey: '71c281ff6ab950e47a2f6f60d4378d9f',//线上
     isWeixin: util.isWeixin(),
     isIos: util.isIos()
 };
 class HomeView extends Component {
-    /*static defaultProps = {
-        roomCreator: 'qq',
-        num: '22'
-    }*/
     state = {
         title: '',//房间标题
         avatar: defaultImage,//头像
@@ -101,7 +97,7 @@ class HomeView extends Component {
             //从首页跳转进入都为游客模式
             dataWin.isTourist = true
             if (util.readCookie('status') === 1) {
-                this.refs.video.playUrl(util.readCookie('hlsPullUrl')) //开始播放
+                this.refs.video.initStart(util.readCookie('hlsPullUrl')) //开始播放
             } else if (util.readCookie('status') === 0 && !util.readCookie('valid')) {
                 this.refs.video.onEnded()
             } else {
@@ -129,13 +125,12 @@ class HomeView extends Component {
 
     //连接聊天室link
     doLink(address) {
-        console.info(11,dataWin.appkey2, dataWin.account,dataWin.token,dataWin.roomid,address)
         //进入聊天室前 先退出 保证只有一个帐号在线
         if (this.room) {
             this.room.disconnect()
         }
         this.room = SDK.Chatroom.getInstance({
-            appKey: dataWin.appkey2, //测试
+            appKey: dataWin.appkey, //测试
             account: dataWin.account,
             token: dataWin.token,
             chatroomId: dataWin.roomid,
@@ -650,7 +645,7 @@ class HomeView extends Component {
                 this.closeLogin()//关闭登录框
                 dataWin.roomid = data.ret.roomid
                 if (data.ret.status === 1) {
-                    this.refs.video.playUrl(data.ret.hlsPullUrl)//开始播放
+                    this.refs.video.initStart(data.ret.hlsPullUrl)//开始播放
                 } else if (data.ret.status === 0 && !data.ret.valid) {
                     this.refs.video.onEnded()
                 } else {

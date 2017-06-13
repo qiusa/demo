@@ -24,7 +24,8 @@ export default class Zen extends Component {
     nav(index) {
         this.setState({
             index: index,
-            sendValue: ''
+            sendValue: '',
+            sendStatus: true
         })
     }
 

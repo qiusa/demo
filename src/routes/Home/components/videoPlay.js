@@ -10,11 +10,15 @@ import ReactDOM, {
 import config from '../../../components/config.js'
 import videojs from 'video.js'
 import 'video.js/dist/video-js.css'
+let dataVideo = {
+    init: false
+}
 class VideoPlay extends Component {
     state = {
-        msg: '加载中。。。', //提示信息
+        msg: '', //提示信息
         playStatus: false, //播放按钮
         isEnd: false, //直播状态
+        hlsPullUrl: '',
         height: '100%',
         attrPro: 'x-webkit-airplay="true" webkit-playsinline="true"'
     }
@@ -23,18 +27,26 @@ class VideoPlay extends Component {
         this.setState({
             height: window.innerHeight
         })
-        //this.getDOMNode().setAttribute('itemtype', '---')
+        this.refs.myVideo.setAttribute('x-webkit-airplay', "true")
+        this.refs.myVideo.setAttribute('webkit-playsinline', "true")
     }
+
+    initStart(hlsPullUrl) {
+        if (dataVideo.init) {
+            return
+        }
+        dataVideo.init = true
+        this.setState({
+            playStatus: true,
+            hlsPullUrl: hlsPullUrl
+        })
+    }
+
     /**
      * 初始化播放器
      * @param  {String} hlsPullUrl 播放地址
      */
-    playUrl(hlsPullUrl) {
-        if (this.state.playStatus) {
-            return
-        }
-        
-        console.info('来啊来',this.state.height)
+    playUrl() {
         this.showError('加载中。。。')
         this.player = videojs(this.refs.myVideo, {
             controls: true,
@@ -48,7 +60,7 @@ class VideoPlay extends Component {
         }, function() {
             this.initPlayerEvent()
             let src = {
-                src: hlsPullUrl,
+                src: this.state.hlsPullUrl,
                 type: 'application/x-mpegURL'
             }
             this.player.src(src)
@@ -58,11 +70,11 @@ class VideoPlay extends Component {
     /**
      * 播放视频
      */
-    play() {
-        this.player.play()
+    playVideo() {
         this.setState({
             playStatus: false
-        })     
+        })
+        this.playUrl()
     }
 
     /**
@@ -79,9 +91,10 @@ class VideoPlay extends Component {
         this.player.on('loadedmetadata', function() {
             console.info('load')
             this.showError("")
-            this.setState({
-                playStatus: true
-            })
+            setTimeout(function() {
+                this.player.play()
+            }.bind(this), 500)
+            
             
         }.bind(this))
         this.player.on('play', function() {
@@ -197,9 +210,9 @@ class VideoPlay extends Component {
                     }
                 </div>
                 <div className={this.state.msg ? 'play-main f-dn' : 'play-main'}>
-                    <video className="video video-js vjs-default-skin vjs-big-play-center 2" ref="myVideo"/* x-webkit-airplay="true" webkit-playsinline="true" */ {...props} playsInline style={{height: this.state.height}}></video>
+                    <video className="video video-js vjs-default-skin vjs-big-play-center" ref="myVideo"/* x-webkit-airplay="true" webkit-playsinline="true" */ {...props} playsInline style={{height: this.state.height}}></video>
                 </div>
-                <div className={this.state.playStatus ? 'play-btn' : 'play-btn f-dn'} onClick={this.play.bind(this)}></div>
+                <div className={this.state.playStatus ? 'play-btn' : 'play-btn f-dn'} onClick={this.playVideo.bind(this)}></div>
             </div>
         )
     }
